@@ -1,0 +1,33 @@
+# 默认：文本文件自动检测，检出时跟随本机，提交时统一 LF
+* text=auto eol=lf
+
+# ===== 强制 LF（跨平台源码 & 构建文件）=====
+*.c      text eol=lf
+*.cpp    text eol=lf
+*.h      text eol=lf
+*.hpp    text eol=lf
+*.cu     text eol=lf
+*.cuh    text eol=lf
+*.cmake  text eol=lf
+CMakeLists.txt text eol=lf
+*.py     text eol=lf
+*.sh     text eol=lf
+*.yml    text eol=lf
+*.yaml   text eol=lf
+*.json   text eol=lf
+*.md     text eol=lf
+
+# ===== 强制 CRLF（仅 Windows 专用文件）=====
+*.bat    text eol=crlf
+*.cmd    text eol=crlf
+*.ps1    text eol=crlf
+*.sln    text eol=crlf
+*.vcxproj text eol=crlf
+
+# ===== 二进制文件不做任何转换 =====
+*.bin    binary
+*.png    binary
+*.jpg    binary
+*.so     binary
+*.dll    binary
+*.exe    binary
