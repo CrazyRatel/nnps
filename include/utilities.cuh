@@ -6,6 +6,8 @@
 #include <thrust/device_vector.h>
 #include <cub/device/device_reduce.cuh>
 
+#include "constant_memory.cuh"
+
 #include <cstdint>
 #include <iostream>
 #include <limits>
@@ -59,7 +61,7 @@ inline void setDevice(int deviceId) {
     }
 }
 
-template <typename Z_T>
+template <typename T>
 __host__ __device__
 uint64_t Z_max_range()
 {
@@ -82,7 +84,7 @@ uint64_t Z_max_range()
     */
     uint64_t max_range = 0;
     uint64_t bit_num = 0;
-    Z_T x = 1;
+    T x = 1;
     while (x > 0)
     {
         ++bit_num;
@@ -192,6 +194,55 @@ T cubMin(const thrust::device_vector<T>& list)
         throw std::runtime_error("cubMin cudaMemcpy failed: " + std::string(cudaGetErrorString(status)));
     }
     return result;
+}
+
+template <typename T>
+void printVector(thrust::device_vector<T> const &list)
+{
+    size_t list_size = list.size();
+    if (list_size == 0)
+    {
+        std::cout << "This vector is empty!" << std::endl;
+        return;
+    }
+
+    long i = 0;
+    for (; i < list_size - 1; i++)
+    {
+        std::cout << list[i] << " ";
+    }
+    std::cout << list[i] << std::endl;
+}
+
+__device__ inline void getPosByIndex(int *pos, const float *x, const float *y, const float *z, std::size_t index, int level)
+{
+    pos[0] = floor((x[index] - dmin[0]) / cmax * exp2f(level));
+    pos[1] = floor((y[index] - dmin[1]) / cmax * exp2f(level));
+    pos[2] = floor((z[index] - dmin[2]) / cmax * exp2f(level));
+}
+
+template <typename T>
+__device__ inline T splitBy3(T x)
+{
+    T res;
+
+    res = x & 0x1fffff;                          // we only look at the first 21 bits
+    res = (res | res << 32) & 0x1f00000000ffff;  // shift left 32 bits, OR with self, and 00011111000000000000000000000000000000001111111111111111
+    res = (res | res << 16) & 0x1f0000ff0000ff;  // shift left 32 bits, OR with self, and 00011111000000000000000011111111000000000000000011111111
+    res = (res | res << 8) & 0x100f00f00f00f00f; // shift left 32 bits, OR with self, and 0001000000001111000000001111000000001111000000001111000000000000
+    res = (res | res << 4) & 0x10c30c30c30c30c3; // shift left 32 bits, OR with self, and 0001000011000011000011000011000011000011000011000011000100000000
+    res = (res | res << 2) & 0x1249249249249249;
+
+    return res;
+}
+
+// todo 二维情况需要修改
+template <typename T>
+__device__ inline T Z_magicbit(const int *x)
+{
+    T ans = 0;
+    ans |= splitBy3<T>(x[0]) | splitBy3<T>(x[1]) << 1 | splitBy3<T>(x[2]) << 2;
+    return ans;
 }
 
 #endif

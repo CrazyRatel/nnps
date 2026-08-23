@@ -5,6 +5,7 @@
 #include "MultiMesh.cuh"
 #include "particle_binary_writer.cuh"
 #include "define_parameters.cuh"
+#include "multi_morton_code.cuh"
 
 inline void debugProcess() {
     std::cout << "NNPS (single GPU edition)" << std::endl;
@@ -16,11 +17,12 @@ inline void debugProcess() {
     // writer.Output_particle(0, points);
 
     const int finest_level = calculateLfineAndSetConstantMemory(points);
-    std::cout << "Fine level: " << finest_level << std::endl;
+    std::cout << "Finest level: " << finest_level << std::endl;
     // initialize MultiMesh with points and Lfine
     MultiMesh multi_mesh(points, finest_level);
 
     // compute morton code
+    calculateMultiMortonCode(multi_mesh);
 
     // sort points by morton code(cub::radixsort)
 
