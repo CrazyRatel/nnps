@@ -1,21 +1,24 @@
 #ifndef NNPS_MODE_H
 #define NNPS_MODE_H
 
-#include "utilities.h"
 #include "Points.cuh"
 #include "MultiMesh.cuh"
 #include "particle_binary_writer.cuh"
+#include "define_parameters.cuh"
 
 inline void debugProcess() {
-    std::cout << "NNPS (single GPU edition)\n" << std::endl;
+    std::cout << "NNPS (single GPU edition)" << std::endl;
 
     // automatically generate points information through settings in gpu_config.h
     Points points;
+    points.uploadPointData();
     // ParticleBinaryWriter writer;
     // writer.Output_particle(0, points);
 
-    
-    MultiMesh multi_mesh(input_particles=points, input_fine_level=0);
+    const int finest_level = calculateLfineAndSetConstantMemory(points);
+    std::cout << "Fine level: " << finest_level << std::endl;
+    // initialize MultiMesh with points and Lfine
+    MultiMesh multi_mesh(points, finest_level);
 
     // compute morton code
 
