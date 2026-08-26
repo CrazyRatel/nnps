@@ -9,18 +9,19 @@
 #include <algorithm>
 #include <cmath>
 #include <vector>
+#include <cstdint>
 
 class MultiMesh {
 public:
     Points particles;
 
-    thrust::device_vector<unsigned long long> z_L;
+    thrust::device_vector<uint64_t> z_L;
     std::vector<thrust::device_vector<int>> m_cindexs;
     std::vector<thrust::device_vector<int>> m_findexs;
     int L_max = 0;
 
-    std::vector<thrust::device_vector<long>> m_hash_indexs_c;
-    std::vector<thrust::device_vector<long>> m_hash_indexs_f;
+    std::vector<thrust::device_vector<int64_t>> m_hash_indexs_c;
+    std::vector<thrust::device_vector<int64_t>> m_hash_indexs_f;
 
     std::vector<thrust::device_vector<int>> m_c_compact_begin_c;
     std::vector<thrust::device_vector<int>> m_c_compact_length_c;
@@ -32,7 +33,7 @@ public:
     std::vector<thrust::device_vector<int>> m_h_begin_f;
     std::vector<thrust::device_vector<int>> m_h_length_f;
 
-    unsigned long long hash_table_size = 1;
+    uint64_t hash_table_size = 1;
     int L_fine = 0;
 
     MultiMesh() = default;
@@ -49,7 +50,7 @@ public:
 
     void initializeMultiMesh() {
         const std::size_t particle_count = particles.particle_num;
-        hash_table_size = std::max<unsigned long long>(1, static_cast<unsigned long long>(particle_count) * 2);
+        hash_table_size = std::max<uint64_t>(1, static_cast<uint64_t>(particle_count) * 2);
         L_max = L_fine;
 
         initializeStorage();

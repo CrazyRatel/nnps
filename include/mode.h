@@ -6,6 +6,8 @@
 #include "particle_binary_writer.cuh"
 #include "define_parameters.cuh"
 #include "multi_morton_code.cuh"
+#include "gpu_config.h"
+#include "radix_sort.cuh"
 
 inline void debugProcess() {
     std::cout << "NNPS (single GPU edition)" << std::endl;
@@ -25,6 +27,7 @@ inline void debugProcess() {
     calculateMultiMortonCode(multi_mesh);
 
     // sort points by morton code(cub::radixsort)
+    sortParticles(getOrderByKey(multi_mesh.z_L), multi_mesh.particles);
 
     // found CF indexs
 
