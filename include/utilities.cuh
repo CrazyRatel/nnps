@@ -245,4 +245,15 @@ __device__ inline T Z_magicbit(const int *x)
     return ans;
 }
 
+struct NotMarker
+{
+    int compare;
+    __device__ __host__ __forceinline__
+    NotMarker(int compare) : compare(compare) {}
+    __device__ __host__ __forceinline__
+    bool operator()(const int &a) const {
+        return (a != compare);
+    }
+};
+
 #endif

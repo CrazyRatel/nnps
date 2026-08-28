@@ -16,22 +16,22 @@ public:
     Points particles;
 
     thrust::device_vector<uint64_t> z_L;
-    std::vector<thrust::device_vector<int>> m_cindexs;
-    std::vector<thrust::device_vector<int>> m_findexs;
+    std::vector<thrust::device_vector<int>> cindexs;
+    std::vector<thrust::device_vector<int>> findexs;
     int L_max = 0;
 
-    std::vector<thrust::device_vector<int64_t>> m_hash_indexs_c;
-    std::vector<thrust::device_vector<int64_t>> m_hash_indexs_f;
+    std::vector<thrust::device_vector<int64_t>> hash_indexs_c;
+    std::vector<thrust::device_vector<int64_t>> hash_indexs_f;
 
-    std::vector<thrust::device_vector<int>> m_c_compact_begin_c;
-    std::vector<thrust::device_vector<int>> m_c_compact_length_c;
-    std::vector<thrust::device_vector<int>> m_c_compact_begin_f;
-    std::vector<thrust::device_vector<int>> m_c_compact_length_f;
+    std::vector<thrust::device_vector<int>> c_compact_begin_c;
+    std::vector<thrust::device_vector<int>> c_compact_length_c;
+    std::vector<thrust::device_vector<int>> c_compact_begin_f;
+    std::vector<thrust::device_vector<int>> c_compact_length_f;
 
-    std::vector<thrust::device_vector<int>> m_h_begin_c;
-    std::vector<thrust::device_vector<int>> m_h_length_c;
-    std::vector<thrust::device_vector<int>> m_h_begin_f;
-    std::vector<thrust::device_vector<int>> m_h_length_f;
+    std::vector<thrust::device_vector<int>> h_begin_c;
+    std::vector<thrust::device_vector<int>> h_length_c;
+    std::vector<thrust::device_vector<int>> h_begin_f;
+    std::vector<thrust::device_vector<int>> h_length_f;
 
     uint64_t hash_table_size = 1;
     int L_fine = 0;
@@ -63,45 +63,45 @@ private:
         const std::size_t level_count = static_cast<std::size_t>(L_max + 1);
 
         z_L.resize(particle_count);
-        m_cindexs.resize(level_count);
-        m_findexs.resize(level_count);
-        m_hash_indexs_c.resize(level_count);
-        m_hash_indexs_f.resize(level_count);
-        m_c_compact_begin_c.resize(level_count);
-        m_c_compact_length_c.resize(level_count);
-        m_c_compact_begin_f.resize(level_count);
-        m_c_compact_length_f.resize(level_count);
-        m_h_begin_c.resize(level_count);
-        m_h_length_c.resize(level_count);
-        m_h_begin_f.resize(level_count);
-        m_h_length_f.resize(level_count);
+        cindexs.resize(level_count);
+        findexs.resize(level_count);
+        hash_indexs_c.resize(level_count);
+        hash_indexs_f.resize(level_count);
+        c_compact_begin_c.resize(level_count);
+        c_compact_length_c.resize(level_count);
+        c_compact_begin_f.resize(level_count);
+        c_compact_length_f.resize(level_count);
+        h_begin_c.resize(level_count);
+        h_length_c.resize(level_count);
+        h_begin_f.resize(level_count);
+        h_length_f.resize(level_count);
 
         for (std::size_t level = 0; level < level_count; ++level) {
-            m_cindexs[level].resize(particle_count);
-            m_findexs[level].resize(particle_count);
-            m_c_compact_begin_c[level].resize(particle_count);
-            m_c_compact_length_c[level].resize(particle_count);
-            m_c_compact_begin_f[level].resize(particle_count);
-            m_c_compact_length_f[level].resize(particle_count);
-            m_h_begin_c[level].resize(hash_table_size);
-            m_h_length_c[level].resize(hash_table_size);
-            m_h_begin_f[level].resize(hash_table_size);
-            m_h_length_f[level].resize(hash_table_size);
+            cindexs[level].resize(particle_count);
+            findexs[level].resize(particle_count);
+            c_compact_begin_c[level].resize(particle_count);
+            c_compact_length_c[level].resize(particle_count);
+            c_compact_begin_f[level].resize(particle_count);
+            c_compact_length_f[level].resize(particle_count);
+            h_begin_c[level].resize(hash_table_size);
+            h_length_c[level].resize(hash_table_size);
+            h_begin_f[level].resize(hash_table_size);
+            h_length_f[level].resize(hash_table_size);
         }
     }
 
     void fillIndexStorage() {
         for (std::size_t level = 0; level <= L_max; ++level) {
-            thrust::fill(m_cindexs[level].begin(), m_cindexs[level].end(), -1);
-            thrust::fill(m_findexs[level].begin(), m_findexs[level].end(), -1);
-            thrust::fill(m_c_compact_begin_c[level].begin(), m_c_compact_begin_c[level].end(), -1);
-            thrust::fill(m_c_compact_length_c[level].begin(), m_c_compact_length_c[level].end(), -1);
-            thrust::fill(m_c_compact_begin_f[level].begin(), m_c_compact_begin_f[level].end(), -1);
-            thrust::fill(m_c_compact_length_f[level].begin(), m_c_compact_length_f[level].end(), -1);
-            thrust::fill(m_h_begin_c[level].begin(), m_h_begin_c[level].end(), -1);
-            thrust::fill(m_h_length_c[level].begin(), m_h_length_c[level].end(), -1);
-            thrust::fill(m_h_begin_f[level].begin(), m_h_begin_f[level].end(), -1);
-            thrust::fill(m_h_length_f[level].begin(), m_h_length_f[level].end(), -1);
+            thrust::fill(cindexs[level].begin(), cindexs[level].end(), -1);
+            thrust::fill(findexs[level].begin(), findexs[level].end(), -1);
+            thrust::fill(c_compact_begin_c[level].begin(), c_compact_begin_c[level].end(), -1);
+            thrust::fill(c_compact_length_c[level].begin(), c_compact_length_c[level].end(), -1);
+            thrust::fill(c_compact_begin_f[level].begin(), c_compact_begin_f[level].end(), -1);
+            thrust::fill(c_compact_length_f[level].begin(), c_compact_length_f[level].end(), -1);
+            thrust::fill(h_begin_c[level].begin(), h_begin_c[level].end(), -1);
+            thrust::fill(h_length_c[level].begin(), h_length_c[level].end(), -1);
+            thrust::fill(h_begin_f[level].begin(), h_begin_f[level].end(), -1);
+            thrust::fill(h_length_f[level].begin(), h_length_f[level].end(), -1);
         }
     }
 };

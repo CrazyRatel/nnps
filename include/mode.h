@@ -8,6 +8,7 @@
 #include "multi_morton_code.cuh"
 #include "gpu_config.h"
 #include "radix_sort.cuh"
+#include "constructCFindexs.cuh"
 
 inline void debugProcess() {
     std::cout << "NNPS (single GPU edition)" << std::endl;
@@ -30,6 +31,7 @@ inline void debugProcess() {
     sortParticles(getOrderByKey(multi_mesh.z_L), multi_mesh.particles);
 
     // found CF indexs
+    createCFindexs(multi_mesh);
 
     // for every mesh:
     // found Ccompact
