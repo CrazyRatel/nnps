@@ -8,7 +8,7 @@
 #include "multi_morton_code.cuh"
 #include "gpu_config.h"
 #include "radix_sort.cuh"
-#include "constructCFindexs.cuh"
+#include "constructCFmesh.cuh"
 
 inline void debugProcess() {
     std::cout << "NNPS (single GPU edition)" << std::endl;
@@ -34,10 +34,16 @@ inline void debugProcess() {
     createCFindexs(multi_mesh);
 
     // for every mesh:
-    // found Ccompact
-    // compute hash result of every elem in Ccompact
-    // sort Ccompact by hash result(cub::radixsort)
-    // found hash table for elem in Ccompact
+    for(int l = 0 ; l <= multi_mesh.L_max ; ++l){
+        // found Ccompact
+        calcCCompactMulti(multi_mesh, l);
+        // compute hash result of every elem in Ccompact
+        calcHashIndexMulti(multi_mesh, l);
+        // sort Ccompact by hash result(cub::radixsort)
+        resortCcompactByHashMulti(multi_mesh, l);
+        // found hash table for elem in Ccompact
+        createHtableMulti(multi_mesh, l);
+    }
 
     // search neightbor for every point in points
 

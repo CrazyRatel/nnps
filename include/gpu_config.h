@@ -16,7 +16,7 @@
 /* 均匀分布 */
 // 单一维度上的粒子数
 #define NUM_PER_DIM 52 // cannot delete, would cause undefined reference in Points.cuh
-#define PARTICLE_PER_DIM 177
+#define PARTICLE_PER_DIM 65
 /* 支持半径范围 */
 #define MAX_H_ 1
 #define MIN_H_ MAX_H_*exp2(-MaxLevel)
