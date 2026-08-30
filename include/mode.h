@@ -9,6 +9,7 @@
 #include "gpu_config.h"
 #include "radix_sort.cuh"
 #include "constructCFmesh.cuh"
+#include "searchNeighborParticles.cuh"
 
 inline void debugProcess() {
     std::cout << "NNPS (single GPU edition)" << std::endl;
@@ -45,7 +46,8 @@ inline void debugProcess() {
         createHtableMulti(multi_mesh, l);
     }
 
-    // search neightbor for every point in points
+    // search neighbor for every point in points
+    searchNeighborParticles(multi_mesh);
 
     std::cout << "Debug process completed." << std::endl;
 }
