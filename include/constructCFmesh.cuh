@@ -220,9 +220,6 @@ inline void calcCCompactMulti(MultiMesh& mesh, int level) {
     }
 
     auto& c_values = mesh.cindexs[level];
-    const std::size_t count = c_values.size();
-    mesh.c_compact_begin_c[level].resize(count, -1);
-    mesh.c_compact_length_c[level].resize(count, 0);
 
     auto host_values = thrust::host_vector<int>(c_values);
     std::vector<int> valid_indices;
@@ -233,12 +230,8 @@ inline void calcCCompactMulti(MultiMesh& mesh, int level) {
         }
     }
 
-    mesh.c_compact_begin_c[level].assign(valid_indices.size(), -1);
-    mesh.c_compact_length_c[level].assign(valid_indices.size(), 0);
-    for (std::size_t i = 0; i < valid_indices.size(); ++i) {
-        mesh.c_compact_begin_c[level][i] = valid_indices[i];
-        mesh.c_compact_length_c[level][i] = 1;
-    }
+    mesh.c_compact_begin_c[level].assign(valid_indices.begin(), valid_indices.end());
+    mesh.c_compact_length_c[level].assign(valid_indices.size(), 1);
 }
 
 inline void calcHashIndexMulti(MultiMesh& mesh, int level) {
@@ -254,12 +247,8 @@ inline void calcHashIndexMulti(MultiMesh& mesh, int level) {
         return;
     }
 
-    thrust::device_vector<int> compact_list(item_count, -1);
+    thrust::device_vector<int> compact_list(mesh.c_compact_begin_c[level]);
     thrust::device_vector<int64_t> hash_result(item_count, 0);
-
-    for (std::size_t i = 0; i < item_count; ++i) {
-        compact_list[i] = mesh.c_compact_begin_c[level][i];
-    }
 
     computeHashIndexKernel<<<(item_count + BLOCKSIZE - 1) / BLOCKSIZE, BLOCKSIZE>>>(
         thrust::raw_pointer_cast(mesh.particles.device_x_coord.data()),
@@ -293,19 +282,14 @@ inline void resortCcompactByHashMulti(MultiMesh& mesh, int level) {
         return;
     }
 
-    thrust::device_vector<int> compact_list(item_count, -1);
-    for (std::size_t i = 0; i < item_count; ++i) {
-        compact_list[i] = mesh.c_compact_begin_c[level][i];
-    }
+    thrust::device_vector<int> compact_list(mesh.c_compact_begin_c[level]);
 
     thrust::sort_by_key(
         mesh.hash_indexs_c[level].begin(),
         mesh.hash_indexs_c[level].end(),
         compact_list.begin());
 
-    for (std::size_t i = 0; i < item_count; ++i) {
-        mesh.c_compact_begin_c[level][i] = compact_list[i];
-    }
+        mesh.c_compact_begin_c[level].swap(compact_list);
 }
 
 inline void createHtableMulti(MultiMesh& mesh, int level) {
@@ -325,16 +309,22 @@ inline void createHtableMulti(MultiMesh& mesh, int level) {
 
     auto hash_values = thrust::host_vector<int64_t>(mesh.hash_indexs_c[level]);
     auto compact_values = thrust::host_vector<int>(mesh.c_compact_begin_c[level]);
+    std::vector<int> h_begin(hash_size, -1);
+    std::vector<int> h_length(hash_size, 0);
     for (std::size_t i = 0; i < hash_values.size(); ++i) {
         const int64_t bucket = hash_values[i] % static_cast<int64_t>(hash_size);
         if (bucket < 0) {
             continue;
         }
-        if (mesh.h_begin_c[level][bucket] < 0) {
-            mesh.h_begin_c[level][bucket] = static_cast<int>(compact_values[i]);
+        const std::size_t bucket_index = static_cast<std::size_t>(bucket);
+        if (h_begin[bucket_index] < 0) {
+            h_begin[bucket_index] = compact_values[i];
         }
-        mesh.h_length_c[level][bucket] += 1;
+        h_length[bucket_index] += 1;
     }
+
+    mesh.h_begin_c[level] = h_begin;
+    mesh.h_length_c[level] = h_length;
 }
 
 #endif
