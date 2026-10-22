@@ -33,16 +33,16 @@ inline thrust::device_vector<unsigned> getOrderByKey(thrust::device_vector<uint6
     thrust::device_vector<unsigned> value(num_items);
     thrust::sequence(thrust::device, value.begin(), value.end());
 
-    thrust::device_vector<unsigned long long> key_alt(key);
+    thrust::device_vector<uint64_t> key_alt(key);
     thrust::device_vector<unsigned> value_alt(value);
 
-    unsigned long long *d_key_buf = thrust::raw_pointer_cast(key.data());                    // e.g., [8, 6, 7, 5, 3, 0, 9]
-    unsigned long long *d_key_alt_buf = thrust::raw_pointer_cast(key_alt.data());            // e.g., [        ...        ]
+    uint64_t *d_key_buf = thrust::raw_pointer_cast(key.data());                    // e.g., [8, 6, 7, 5, 3, 0, 9]
+    uint64_t *d_key_alt_buf = thrust::raw_pointer_cast(key_alt.data());            // e.g., [        ...        ]
     unsigned *d_value_buf = thrust::raw_pointer_cast(value.data());         // e.g., [0, 1, 2, 3, 4, 5, 6]
     unsigned *d_value_alt_buf = thrust::raw_pointer_cast(value_alt.data()); // e.g., [        ...        ]
 
     // Create a set of DoubleBuffers to wrap pairs of device pointers
-    cub::DoubleBuffer<unsigned long long> d_keys(d_key_buf, d_key_alt_buf);
+    cub::DoubleBuffer<uint64_t> d_keys(d_key_buf, d_key_alt_buf);
     cub::DoubleBuffer<unsigned> d_values(d_value_buf, d_value_alt_buf);
 
     // Determine temporary device storage requirements
